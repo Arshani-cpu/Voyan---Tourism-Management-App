@@ -1,0 +1,277 @@
+import { DestinationItem, PlaceCategory } from '../types/travel';
+
+export const DISCOVERY_DESTINATIONS: DestinationItem[] = [
+  {
+    id: 'goa',
+    name: 'Goa',
+    state: 'Goa',
+    region: 'West',
+    category: 'Coastal & Beach',
+    tagline: 'Sun-drenched golden coves, heritage Portuguese architecture & tranquil beachside shacks',
+    startingPrice: 7200,
+    recommendedDays: 4,
+    bestMonths: 'Nov – Apr',
+    image: '/src/assets/images/dest_goa_beach_1792467060231.jpg',
+    rating: 4.9,
+    reviewsCount: 1890,
+    highlights: ['Palolem Crescent Bay', 'Fontainhas Heritage Walk', 'Cabo de Rama Cliffs', 'Goan Spice Trails'],
+    defaultPrompt: 'A relaxed 4-day trip to South Goa with quiet beaches, cafe hopping, and coastal sunsets'
+  },
+  {
+    id: 'rajasthan',
+    name: 'Rajasthan',
+    state: 'Rajasthan',
+    region: 'North',
+    category: 'Heritage & Royal',
+    tagline: 'Grand royal forts, intricate sandstone courtyards & vibrant desert bazaars',
+    startingPrice: 8500,
+    recommendedDays: 5,
+    bestMonths: 'Oct – Mar',
+    image: '/src/assets/images/dest_jaipur_palace_1792467061075.jpg',
+    rating: 4.9,
+    reviewsCount: 3420,
+    highlights: ['Amber Fort Mirrors', 'Hawa Mahal Dawn View', 'Udaipur Pichola Lake', 'Thar Desert Stargazing'],
+    defaultPrompt: 'Plan a 5-day royal palaces and stepwells heritage trail across Rajasthan'
+  },
+  {
+    id: 'kerala',
+    name: 'Kerala',
+    state: 'Kerala',
+    region: 'South',
+    category: 'Serene & Nature',
+    tagline: 'Emerald backwaters, tranquil kettuvallam houseboats & misty highland spice plantations',
+    startingPrice: 7800,
+    recommendedDays: 4,
+    bestMonths: 'Sep – Mar',
+    image: '/src/assets/images/dest_kerala_backwaters_1792467358939.jpg',
+    rating: 4.9,
+    reviewsCount: 2640,
+    highlights: ['Alleppey Houseboat Stay', 'Munnar Tea Slopes', 'Periyar Wildlife Sanctuary', 'Kathakali Centers'],
+    defaultPrompt: 'A 7-day cultural tour of South India and Kerala backwaters for two'
+  },
+  {
+    id: 'himachal',
+    name: 'Himachal Pradesh',
+    state: 'Himachal Pradesh',
+    region: 'Himalayas',
+    category: 'Hills & Mountains',
+    tagline: 'Snow-clad Himalayan crests, fragrant cedar pine forests & secluded mountain cottages',
+    startingPrice: 6500,
+    recommendedDays: 5,
+    bestMonths: 'Apr – Jun / Dec – Feb',
+    image: '/src/assets/images/dest_himachal_mountains_1792467360205.jpg',
+    rating: 4.8,
+    reviewsCount: 2190,
+    highlights: ['Solang Valley Snow Trail', 'Old Manali Apple Orchards', 'Spiti Monastery Vistas', 'Parvati River Hikes'],
+    defaultPrompt: 'A peaceful weekend in the mountains of Himachal Pradesh with wooden cabin stays'
+  }
+];
+
+export const POPULAR_DESTINATIONS: DestinationItem[] = [
+  ...DISCOVERY_DESTINATIONS,
+  {
+    id: 'ooty',
+    name: 'Ooty & Nilgiris',
+    state: 'Tamil Nadu',
+    region: 'South',
+    category: 'Hills & Mountains',
+    tagline: 'Misty tea plantations, heritage toy train & eucalyptus slopes',
+    startingPrice: 4850,
+    recommendedDays: 3,
+    bestMonths: 'Oct – May',
+    image: '/src/assets/images/dest_ooty_hills_1792467058609.jpg',
+    rating: 4.8,
+    reviewsCount: 1420,
+    highlights: ['Nilgiri Mountain Railway', 'Doddabetta Peak', 'Emerald Lake', 'Tea Museum'],
+    defaultPrompt: 'Plan a 3-day trip to Ooty under ₹5,000 with tea estate walks and cozy viewpoints'
+  },
+  {
+    id: 'kashmir',
+    name: 'Srinagar & Gulmarg',
+    state: 'Jammu & Kashmir',
+    region: 'Himalayas',
+    category: 'Serene & Nature',
+    tagline: 'Dal Lake shikara rides, snowline gondolas & fragrant pine valleys',
+    startingPrice: 11500,
+    recommendedDays: 5,
+    bestMonths: 'Apr – Oct / Dec – Feb',
+    image: '/src/assets/images/dest_kashmir_dal_lake_1792467060538.jpg',
+    rating: 4.9,
+    reviewsCount: 2180,
+    highlights: ['Shikara Sunrise Ride', 'Gulmarg Apharwat Peak', 'Nigeen Lake Houseboat', 'Old City Wazwan'],
+    defaultPrompt: 'A peaceful 5-day escape to Kashmir with houseboats, meadow walks, and scenic gondola'
+  }
+];
+
+const DESTINATION_IMAGES: Record<DestinationItem['category'], string> = {
+  'Hills & Mountains': '/src/assets/images/dest_himachal_mountains_1792467360205.jpg',
+  'Heritage & Royal': '/src/assets/images/dest_jaipur_palace_1792467061075.jpg',
+  'Coastal & Beach': '/src/assets/images/dest_goa_beach_1792467060231.jpg',
+  'Serene & Nature': '/src/assets/images/dest_kerala_backwaters_1792467358939.jpg',
+};
+
+type DestinationSeed = Pick<
+  DestinationItem,
+  'id' | 'name' | 'state' | 'region' | 'category' | 'tagline' | 'highlights'
+> & Partial<Pick<DestinationItem, 'startingPrice' | 'recommendedDays' | 'bestMonths'>>;
+
+const createDestination = (seed: DestinationSeed): DestinationItem => ({
+  ...seed,
+  startingPrice: seed.startingPrice ?? 8000,
+  recommendedDays: seed.recommendedDays ?? 3,
+  bestMonths: seed.bestMonths ?? 'Oct – Mar',
+  image: DESTINATION_IMAGES[seed.category],
+  rating: 0,
+  reviewsCount: 0,
+  defaultPrompt: `Plan a ${seed.recommendedDays ?? 3}-day trip to ${seed.name}, ${seed.state}, including ${seed.highlights.slice(0, 3).join(', ')}.`,
+});
+
+const ADDITIONAL_DESTINATIONS: DestinationItem[] = [
+  createDestination({ id: 'araku-valley', name: 'Araku Valley', state: 'Andhra Pradesh', region: 'South', category: 'Hills & Mountains', tagline: 'Eastern Ghats scenery, coffee plantations and tribal heritage.', highlights: ['Borra Caves', 'Katiki Waterfalls', 'Araku Tribal Museum', 'Coffee Museum'], bestMonths: 'Oct – Mar' }),
+  createDestination({ id: 'tawang', name: 'Tawang', state: 'Arunachal Pradesh', region: 'Himalayas', category: 'Hills & Mountains', tagline: 'High Himalayan passes, mountain lakes and a historic monastery.', highlights: ['Tawang Monastery', 'Sela Pass', 'Madhuri Lake', 'Nuranang Falls'], bestMonths: 'Mar – Oct', recommendedDays: 4 }),
+  createDestination({ id: 'kaziranga', name: 'Kaziranga National Park', state: 'Assam', region: 'East', category: 'Serene & Nature', tagline: 'A UNESCO-listed landscape known for grasslands and one-horned rhinoceroses.', highlights: ['Kaziranga National Park', 'Kohora Range', 'Kaziranga Orchid Park', 'Brahmaputra river views'], bestMonths: 'Nov – Apr', recommendedDays: 3 }),
+  createDestination({ id: 'bodh-gaya', name: 'Bodh Gaya', state: 'Bihar', region: 'East', category: 'Heritage & Royal', tagline: 'A major Buddhist pilgrimage destination centered on the Mahabodhi Temple.', highlights: ['Mahabodhi Temple', 'Great Buddha Statue', 'Thai Monastery', 'Muchalinda Lake'], bestMonths: 'Oct – Mar', recommendedDays: 2 }),
+  createDestination({ id: 'chitrakote', name: 'Chitrakote Falls', state: 'Chhattisgarh', region: 'East', category: 'Serene & Nature', tagline: 'A wide horseshoe-shaped waterfall on the Indravati River near Jagdalpur.', highlights: ['Chitrakote Falls', 'Tirathgarh Falls', 'Kanger Valley National Park', 'Bastar handicraft markets'], bestMonths: 'Jul – Feb', recommendedDays: 3 }),
+  createDestination({ id: 'rann-of-kutch', name: 'Rann of Kutch', state: 'Gujarat', region: 'West', category: 'Serene & Nature', tagline: 'Vast salt desert landscapes, craft villages and seasonal cultural festivals.', highlights: ['Great Rann of Kutch', 'Kalo Dungar', 'Dholavira', 'Bhujodi craft village'], bestMonths: 'Nov – Feb', recommendedDays: 4 }),
+  createDestination({ id: 'kurukshetra', name: 'Kurukshetra', state: 'Haryana', region: 'North', category: 'Heritage & Royal', tagline: 'Historic pilgrimage sites and museums around the legendary Brahma Sarovar.', highlights: ['Brahma Sarovar', 'Jyotisar', 'Sheikh Chilli Tomb', 'Kurukshetra Panorama and Science Centre'], bestMonths: 'Oct – Mar', recommendedDays: 2 }),
+  createDestination({ id: 'netarhat', name: 'Netarhat', state: 'Jharkhand', region: 'East', category: 'Hills & Mountains', tagline: 'A quiet plateau retreat with forest viewpoints and sunrise landscapes.', highlights: ['Magnolia Point', 'Sunrise Point', 'Upper Ghaghri Falls', 'Netarhat Dam'], bestMonths: 'Oct – Mar', recommendedDays: 2 }),
+  createDestination({ id: 'hampi', name: 'Hampi', state: 'Karnataka', region: 'South', category: 'Heritage & Royal', tagline: 'A UNESCO World Heritage landscape of Vijayanagara-era temples and ruins.', highlights: ['Virupaksha Temple', 'Vittala Temple', 'Hampi Bazaar', 'Matanga Hill'], bestMonths: 'Oct – Feb', recommendedDays: 3 }),
+  createDestination({ id: 'khajuraho', name: 'Khajuraho', state: 'Madhya Pradesh', region: 'North', category: 'Heritage & Royal', tagline: 'UNESCO-listed temple groups celebrated for their intricate medieval carvings.', highlights: ['Western Group of Temples', 'Kandariya Mahadeva Temple', 'Eastern Group of Temples', 'Raneh Falls'], bestMonths: 'Oct – Mar', recommendedDays: 2 }),
+  createDestination({ id: 'ajanta-ellora', name: 'Ajanta & Ellora Caves', state: 'Maharashtra', region: 'West', category: 'Heritage & Royal', tagline: 'Remarkable rock-cut Buddhist, Hindu and Jain monuments near Chhatrapati Sambhajinagar.', highlights: ['Ajanta Caves', 'Ellora Caves', 'Kailasa Temple', 'Bibi Ka Maqbara'], bestMonths: 'Oct – Mar', recommendedDays: 3 }),
+  createDestination({ id: 'loktak-lake', name: 'Loktak Lake', state: 'Manipur', region: 'East', category: 'Serene & Nature', tagline: 'Northeast India’s largest freshwater lake, known for floating phumdis.', highlights: ['Loktak Lake', 'Keibul Lamjao National Park', 'Sendra viewpoint', 'INA Memorial at Moirang'], bestMonths: 'Oct – Mar', recommendedDays: 3 }),
+  createDestination({ id: 'sohra', name: 'Sohra (Cherrapunji)', state: 'Meghalaya', region: 'East', category: 'Serene & Nature', tagline: 'Living root bridges, limestone caves and dramatic monsoon-fed waterfalls.', highlights: ['Nohkalikai Falls', 'Double Decker Living Root Bridge', 'Mawsmai Cave', 'Seven Sisters Falls'], bestMonths: 'Oct – May', recommendedDays: 3 }),
+  createDestination({ id: 'aizawl', name: 'Aizawl', state: 'Mizoram', region: 'East', category: 'Hills & Mountains', tagline: 'A hilltop city with panoramic views, local markets and Mizo cultural sites.', highlights: ['Durtlang Hills', 'Mizoram State Museum', 'Solomon’s Temple', 'Bara Bazar'], bestMonths: 'Oct – Mar', recommendedDays: 2 }),
+  createDestination({ id: 'kohima', name: 'Kohima & Dzüko Valley', state: 'Nagaland', region: 'East', category: 'Hills & Mountains', tagline: 'Mountain trails, Naga heritage and the high-altitude Dzüko Valley.', highlights: ['Dzüko Valley', 'Kohima War Cemetery', 'Kisama Heritage Village', 'Kohima State Museum'], bestMonths: 'Oct – Apr', recommendedDays: 4 }),
+  createDestination({ id: 'puri-konark', name: 'Puri & Konark', state: 'Odisha', region: 'East', category: 'Coastal & Beach', tagline: 'A Bay of Bengal pilgrimage coast paired with the UNESCO-listed Sun Temple.', highlights: ['Jagannath Temple', 'Konark Sun Temple', 'Chandrabhaga Beach', 'Raghurajpur crafts village'], bestMonths: 'Oct – Feb', recommendedDays: 3 }),
+  createDestination({ id: 'amritsar', name: 'Amritsar', state: 'Punjab', region: 'North', category: 'Heritage & Royal', tagline: 'A vibrant city of Sikh heritage, Punjabi cuisine and historic landmarks.', highlights: ['Golden Temple', 'Jallianwala Bagh', 'Wagah–Attari border ceremony', 'Partition Museum'], bestMonths: 'Oct – Mar', recommendedDays: 2 }),
+  createDestination({ id: 'gangtok', name: 'Gangtok', state: 'Sikkim', region: 'Himalayas', category: 'Hills & Mountains', tagline: 'A Himalayan capital with monastery visits and views toward the Kanchenjunga range.', highlights: ['Rumtek Monastery', 'Tsomgo Lake', 'Namgyal Institute of Tibetology', 'MG Marg'], bestMonths: 'Mar – Jun / Sep – Nov', recommendedDays: 3 }),
+  createDestination({ id: 'hyderabad', name: 'Hyderabad', state: 'Telangana', region: 'South', category: 'Heritage & Royal', tagline: 'Historic Deccan architecture, lively bazaars and a celebrated food scene.', highlights: ['Charminar', 'Golconda Fort', 'Chowmahalla Palace', 'Salar Jung Museum'], bestMonths: 'Oct – Feb', recommendedDays: 3 }),
+  createDestination({ id: 'neermahal', name: 'Agartala & Neermahal', state: 'Tripura', region: 'East', category: 'Heritage & Royal', tagline: 'A relaxed capital-city visit with palaces, temples and a lake palace excursion.', highlights: ['Ujjayanta Palace', 'Neermahal', 'Tripura Sundari Temple', 'Sepahijala Wildlife Sanctuary'], bestMonths: 'Oct – Mar', recommendedDays: 3 }),
+  createDestination({ id: 'varanasi', name: 'Varanasi', state: 'Uttar Pradesh', region: 'North', category: 'Heritage & Royal', tagline: 'An ancient riverfront city known for its ghats, temples and evening Ganga Aarti.', highlights: ['Dashashwamedh Ghat', 'Kashi Vishwanath Temple', 'Sarnath', 'Assi Ghat'], bestMonths: 'Oct – Mar', recommendedDays: 3 }),
+  createDestination({ id: 'rishikesh', name: 'Rishikesh', state: 'Uttarakhand', region: 'Himalayas', category: 'Serene & Nature', tagline: 'A Ganges-side foothill town for yoga, riverside walks and outdoor activities.', highlights: ['Lakshman Jhula area', 'Triveni Ghat', 'Neer Garh Waterfall', 'Rajaji National Park'], bestMonths: 'Sep – Apr', recommendedDays: 3 }),
+  createDestination({ id: 'darjeeling', name: 'Darjeeling', state: 'West Bengal', region: 'Himalayas', category: 'Hills & Mountains', tagline: 'Tea gardens, Himalayan sunrise viewpoints and the UNESCO-listed mountain railway.', highlights: ['Darjeeling Himalayan Railway', 'Tiger Hill', 'Batasia Loop', 'Happy Valley Tea Estate'], bestMonths: 'Mar – May / Oct – Dec', recommendedDays: 3 }),
+  createDestination({ id: 'delhi', name: 'Delhi', state: 'Delhi', region: 'North', category: 'Heritage & Royal', tagline: 'India’s capital brings together Mughal monuments, museums and diverse neighborhoods.', highlights: ['Red Fort', 'Humayun’s Tomb', 'Qutub Minar', 'India Gate'], bestMonths: 'Oct – Mar', recommendedDays: 3 }),
+  createDestination({ id: 'chandigarh', name: 'Chandigarh', state: 'Chandigarh', region: 'North', category: 'Serene & Nature', tagline: 'A planned city known for modernist architecture, gardens and a lakeside promenade.', highlights: ['Rock Garden', 'Sukhna Lake', 'Capitol Complex', 'Government Museum and Art Gallery'], bestMonths: 'Oct – Mar', recommendedDays: 2 }),
+  createDestination({ id: 'leh-ladakh', name: 'Leh & Ladakh', state: 'Ladakh', region: 'Himalayas', category: 'Hills & Mountains', tagline: 'High-altitude monasteries, mountain passes and stark Himalayan desert scenery.', highlights: ['Leh Palace', 'Thiksey Monastery', 'Pangong Tso', 'Nubra Valley'], bestMonths: 'May – Sep', recommendedDays: 5 }),
+  createDestination({ id: 'sri-vijaya-puram', name: 'Sri Vijaya Puram & Havelock', state: 'Andaman and Nicobar Islands', region: 'East', category: 'Coastal & Beach', tagline: 'Island beaches, marine life and colonial history in the Bay of Bengal.', highlights: ['Cellular Jail', 'Swaraj Dweep (Havelock)', 'Radhanagar Beach', 'Mahatma Gandhi Marine National Park'], bestMonths: 'Nov – Apr', recommendedDays: 5 }),
+  createDestination({ id: 'silvassa-daman', name: 'Silvassa & Daman', state: 'Dadra and Nagar Haveli and Daman and Diu', region: 'West', category: 'Coastal & Beach', tagline: 'A western India getaway combining Daman’s shoreline with Silvassa’s green spaces.', highlights: ['Jampore Beach', 'Devka Beach', 'Dudhni Lake', 'Vanganga Garden'], bestMonths: 'Nov – Mar', recommendedDays: 3 }),
+  createDestination({ id: 'lakshadweep', name: 'Lakshadweep Islands', state: 'Lakshadweep', region: 'West', category: 'Coastal & Beach', tagline: 'A remote Arabian Sea archipelago with coral reefs and clear-water lagoons.', highlights: ['Agatti Island', 'Bangaram Island', 'Kavaratti', 'Marine lagoons and reefs'], bestMonths: 'Oct – May', recommendedDays: 5 }),
+  createDestination({ id: 'puducherry', name: 'Puducherry', state: 'Puducherry', region: 'South', category: 'Coastal & Beach', tagline: 'A coastal town with French Quarter streets, heritage buildings and seaside promenades.', highlights: ['White Town', 'Promenade Beach', 'Auroville', 'Sri Aurobindo Ashram'], bestMonths: 'Nov – Feb', recommendedDays: 3 }),
+  createDestination({ id: 'chennai', name: 'Chennai', state: 'Tamil Nadu', region: 'South', category: 'Coastal & Beach', tagline: 'A lively coastal capital blending historic temples, museums, markets and a long urban shoreline.', highlights: ['Marina Beach', 'Kapaleeshwarar Temple', 'Fort St. George', 'Government Museum'], bestMonths: 'Nov – Feb', recommendedDays: 3 }),
+  createDestination({ id: 'madurai', name: 'Madurai', state: 'Tamil Nadu', region: 'South', category: 'Heritage & Royal', tagline: 'An ancient temple city known for Dravidian architecture, lively bazaars and regional cuisine.', highlights: ['Meenakshi Amman Temple', 'Thirumalai Nayakkar Palace', 'Gandhi Memorial Museum', 'Vandiyur Mariamman Teppakulam'], bestMonths: 'Oct – Mar', recommendedDays: 2 }),
+  createDestination({ id: 'kanyakumari', name: 'Kanyakumari', state: 'Tamil Nadu', region: 'South', category: 'Coastal & Beach', tagline: 'India’s southern tip, with coastal viewpoints, memorials and sunrise and sunset scenes.', highlights: ['Vivekananda Rock Memorial', 'Thiruvalluvar Statue', 'Kanyakumari Beach', 'Padmanabhapuram Palace'], bestMonths: 'Oct – Mar', recommendedDays: 2 }),
+  createDestination({ id: 'rameswaram', name: 'Rameswaram', state: 'Tamil Nadu', region: 'South', category: 'Coastal & Beach', tagline: 'A sacred island town with celebrated temple corridors and the landscapes of Pamban.', highlights: ['Ramanathaswamy Temple', 'Pamban Bridge', 'Dhanushkodi', 'APJ Abdul Kalam Memorial'], bestMonths: 'Oct – Apr', recommendedDays: 2 }),
+  createDestination({ id: 'thanjavur', name: 'Thanjavur', state: 'Tamil Nadu', region: 'South', category: 'Heritage & Royal', tagline: 'A cultural center of the Chola era, renowned for monumental temples and traditional arts.', highlights: ['Brihadisvara Temple', 'Thanjavur Maratha Palace', 'Saraswathi Mahal Library', 'Schwartz Church'], bestMonths: 'Nov – Feb', recommendedDays: 2 }),
+  createDestination({ id: 'mahabalipuram', name: 'Mahabalipuram', state: 'Tamil Nadu', region: 'South', category: 'Coastal & Beach', tagline: 'A Bay of Bengal heritage town featuring Pallava-era stone monuments and shore views.', highlights: ['Shore Temple', 'Pancha Rathas', 'Arjuna’s Penance', 'Mahabalipuram Beach'], bestMonths: 'Nov – Feb', recommendedDays: 2 }),
+  createDestination({ id: 'kodaikanal', name: 'Kodaikanal', state: 'Tamil Nadu', region: 'South', category: 'Hills & Mountains', tagline: 'A cool hill station of forest trails, waterfalls and a star-shaped lake.', highlights: ['Kodaikanal Lake', 'Coaker’s Walk', 'Pillar Rocks', 'Bryant Park'], bestMonths: 'Oct – Jun', recommendedDays: 3 }),
+  createDestination({ id: 'coonoor', name: 'Coonoor', state: 'Tamil Nadu', region: 'South', category: 'Hills & Mountains', tagline: 'A Nilgiri hill town with tea gardens, heritage rail views and quiet mountain lookouts.', highlights: ['Sim’s Park', 'Dolphin’s Nose viewpoint', 'Lamb’s Rock', 'Nilgiri Mountain Railway'], bestMonths: 'Oct – May', recommendedDays: 2 }),
+  createDestination({ id: 'yercaud', name: 'Yercaud', state: 'Tamil Nadu', region: 'South', category: 'Hills & Mountains', tagline: 'A relaxed Eastern Ghats retreat surrounded by coffee plantations and forested viewpoints.', highlights: ['Yercaud Lake', 'Lady’s Seat', 'Pagoda Point', 'Kiliyur Falls'], bestMonths: 'Oct – Jun', recommendedDays: 2 }),
+  createDestination({ id: 'kanchipuram', name: 'Kanchipuram', state: 'Tamil Nadu', region: 'South', category: 'Heritage & Royal', tagline: 'A historic temple city and celebrated center of handwoven silk sarees.', highlights: ['Kailasanathar Temple', 'Ekambareswarar Temple', 'Varadharaja Perumal Temple', 'Kamakshi Amman Temple'], bestMonths: 'Nov – Feb', recommendedDays: 2 }),
+  createDestination({ id: 'tiruchirappalli', name: 'Tiruchirappalli (Trichy)', state: 'Tamil Nadu', region: 'South', category: 'Heritage & Royal', tagline: 'A historic city on the Kaveri, crowned by its iconic rock fort and temple complex.', highlights: ['Rockfort Temple', 'Sri Ranganathaswamy Temple', 'Jambukeswarar Temple', 'Kallanai Dam'], bestMonths: 'Nov – Feb', recommendedDays: 2 }),
+  createDestination({ id: 'tiruvannamalai', name: 'Tiruvannamalai', state: 'Tamil Nadu', region: 'South', category: 'Heritage & Royal', tagline: 'A major pilgrimage town at the foot of Arunachala Hill, with a vast historic temple.', highlights: ['Arunachaleswarar Temple', 'Arunachala Hill', 'Virupaksha Cave', 'Sathanur Dam'], bestMonths: 'Nov – Feb', recommendedDays: 2 }),
+  createDestination({ id: 'chettinad', name: 'Chettinad & Karaikudi', state: 'Tamil Nadu', region: 'South', category: 'Heritage & Royal', tagline: 'A distinctive heritage region known for ornate mansions, craft traditions and Chettinad cuisine.', highlights: ['Chettinad mansions', 'Chettinad Palace', 'Aairam Jannal Veedu', 'Athangudi tile workshops'], bestMonths: 'Nov – Feb', recommendedDays: 2 }),
+  createDestination({ id: 'hogenakkal', name: 'Hogenakkal Falls', state: 'Tamil Nadu', region: 'South', category: 'Serene & Nature', tagline: 'A dramatic Kaveri River landscape with rocky gorges and seasonal waterfalls.', highlights: ['Hogenakkal Falls', 'Kaveri river viewpoints', 'Pennagaram village', 'Mettur Dam'], bestMonths: 'Oct – Feb', recommendedDays: 1 }),
+  createDestination({ id: 'mudumalai', name: 'Mudumalai & Masinagudi', state: 'Tamil Nadu', region: 'South', category: 'Serene & Nature', tagline: 'A Western Ghats wildlife landscape of forest drives, biodiversity and foothill stays.', highlights: ['Mudumalai Tiger Reserve', 'Theppakadu Elephant Camp', 'Moyar River viewpoints', 'Masinagudi forest routes'], bestMonths: 'Oct – May', recommendedDays: 2 }),
+  createDestination({ id: 'valparai', name: 'Valparai', state: 'Tamil Nadu', region: 'South', category: 'Hills & Mountains', tagline: 'A quiet Anamalai hill town with tea estates, rainforest and winding mountain roads.', highlights: ['Aliyar Dam', 'Nallamudi Viewpoint', 'Sholayar Dam', 'Balaji Temple'], bestMonths: 'Sep – Mar', recommendedDays: 2 }),
+  createDestination({ id: 'chidambaram', name: 'Chidambaram', state: 'Tamil Nadu', region: 'South', category: 'Heritage & Royal', tagline: 'A historic temple town near the coast, known for classical architecture and dance heritage.', highlights: ['Thillai Nataraja Temple', 'Pichavaram Mangrove Forest', 'Sattanathar Temple', 'Cuddalore Silver Beach'], bestMonths: 'Nov – Feb', recommendedDays: 2 }),
+  createDestination({ id: 'kumbakonam', name: 'Kumbakonam', state: 'Tamil Nadu', region: 'South', category: 'Heritage & Royal', tagline: 'A temple-rich Kaveri delta town surrounded by historic shrines and traditional crafts.', highlights: ['Airavatesvara Temple', 'Adi Kumbeswarar Temple', 'Sarangapani Temple', 'Mahamaham Tank'], bestMonths: 'Nov – Feb', recommendedDays: 2 }),
+  createDestination({ id: 'tirunelveli-courtallam', name: 'Tirunelveli & Courtallam', state: 'Tamil Nadu', region: 'South', category: 'Serene & Nature', tagline: 'A southern Tamil Nadu route pairing a historic city with the seasonal waterfalls of Courtallam.', highlights: ['Nellaiappar Temple', 'Courtallam Main Falls', 'Five Falls', 'Manimuthar Dam'], bestMonths: 'Jun – Feb', recommendedDays: 2 }),
+  createDestination({ id: 'velankanni', name: 'Velankanni', state: 'Tamil Nadu', region: 'South', category: 'Coastal & Beach', tagline: 'A coastal pilgrimage town known for its basilica, devotional heritage and Bay of Bengal shoreline.', highlights: ['Basilica of Our Lady of Good Health', 'Velankanni Beach', 'Nagapattinam', 'Vailankanni Museum'], bestMonths: 'Nov – Feb', recommendedDays: 2 }),
+  createDestination({ id: 'pollachi', name: 'Pollachi & Anamalai', state: 'Tamil Nadu', region: 'South', category: 'Serene & Nature', tagline: 'A green foothill region of coconut groves, reservoirs and access to Anamalai landscapes.', highlights: ['Topslip', 'Aliyar Dam', 'Monkey Falls', 'Anamalai Tiger Reserve'], bestMonths: 'Oct – Mar', recommendedDays: 2 }),
+  createDestination({ id: 'vellore', name: 'Vellore', state: 'Tamil Nadu', region: 'South', category: 'Heritage & Royal', tagline: 'A historic inland city with a landmark fort, museum and notable temple architecture.', highlights: ['Vellore Fort', 'Jalakandeswarar Temple', 'Government Museum', 'Sripuram Golden Temple'], bestMonths: 'Nov – Feb', recommendedDays: 2 }),
+];
+
+POPULAR_DESTINATIONS.push(...ADDITIONAL_DESTINATIONS);
+
+export const PLACE_CATEGORIES: PlaceCategory[] = [
+  'Historical & Heritage',
+  'Adventure & Outdoors',
+  'Temples & Pilgrimage',
+  'Amusement & Family',
+  'Beaches & Islands',
+  'Resorts & Wellness',
+  'Nature & Wildlife',
+  'Lakes & Waterfalls',
+  'Culture & Festivals',
+  'Food & Markets',
+];
+
+const PLACE_CATEGORIES_BY_DESTINATION: Record<string, PlaceCategory[]> = {
+  goa: ['Beaches & Islands', 'Adventure & Outdoors', 'Resorts & Wellness', 'Food & Markets'],
+  rajasthan: ['Historical & Heritage', 'Adventure & Outdoors', 'Culture & Festivals', 'Food & Markets'],
+  kerala: ['Nature & Wildlife', 'Lakes & Waterfalls', 'Resorts & Wellness', 'Culture & Festivals'],
+  himachal: ['Adventure & Outdoors', 'Nature & Wildlife', 'Lakes & Waterfalls', 'Resorts & Wellness'],
+  ooty: ['Nature & Wildlife', 'Lakes & Waterfalls', 'Amusement & Family', 'Historical & Heritage'],
+  chennai: ['Historical & Heritage', 'Temples & Pilgrimage', 'Beaches & Islands', 'Food & Markets'],
+  madurai: ['Historical & Heritage', 'Temples & Pilgrimage', 'Culture & Festivals', 'Food & Markets'],
+  kanyakumari: ['Historical & Heritage', 'Temples & Pilgrimage', 'Beaches & Islands', 'Nature & Wildlife'],
+  rameswaram: ['Historical & Heritage', 'Temples & Pilgrimage', 'Beaches & Islands'],
+  thanjavur: ['Historical & Heritage', 'Temples & Pilgrimage', 'Culture & Festivals'],
+  mahabalipuram: ['Historical & Heritage', 'Beaches & Islands', 'Culture & Festivals'],
+  kodaikanal: ['Nature & Wildlife', 'Lakes & Waterfalls', 'Adventure & Outdoors', 'Resorts & Wellness'],
+  coonoor: ['Nature & Wildlife', 'Adventure & Outdoors', 'Resorts & Wellness'],
+  yercaud: ['Nature & Wildlife', 'Lakes & Waterfalls', 'Adventure & Outdoors'],
+  kanchipuram: ['Historical & Heritage', 'Temples & Pilgrimage', 'Culture & Festivals'],
+  tiruchirappalli: ['Historical & Heritage', 'Temples & Pilgrimage', 'Culture & Festivals'],
+  tiruvannamalai: ['Historical & Heritage', 'Temples & Pilgrimage', 'Adventure & Outdoors'],
+  chettinad: ['Historical & Heritage', 'Culture & Festivals', 'Food & Markets'],
+  hogenakkal: ['Nature & Wildlife', 'Lakes & Waterfalls', 'Adventure & Outdoors'],
+  mudumalai: ['Nature & Wildlife', 'Adventure & Outdoors'],
+  valparai: ['Nature & Wildlife', 'Adventure & Outdoors', 'Resorts & Wellness'],
+  chidambaram: ['Historical & Heritage', 'Temples & Pilgrimage', 'Nature & Wildlife'],
+  kumbakonam: ['Historical & Heritage', 'Temples & Pilgrimage', 'Culture & Festivals'],
+  'tirunelveli-courtallam': ['Historical & Heritage', 'Temples & Pilgrimage', 'Lakes & Waterfalls', 'Nature & Wildlife'],
+  velankanni: ['Temples & Pilgrimage', 'Beaches & Islands', 'Culture & Festivals'],
+  pollachi: ['Nature & Wildlife', 'Adventure & Outdoors', 'Lakes & Waterfalls'],
+  vellore: ['Historical & Heritage', 'Temples & Pilgrimage'],
+  kashmir: ['Nature & Wildlife', 'Adventure & Outdoors', 'Lakes & Waterfalls', 'Resorts & Wellness'],
+  'araku-valley': ['Nature & Wildlife', 'Lakes & Waterfalls', 'Culture & Festivals'],
+  tawang: ['Temples & Pilgrimage', 'Adventure & Outdoors', 'Lakes & Waterfalls', 'Culture & Festivals'],
+  kaziranga: ['Nature & Wildlife', 'Adventure & Outdoors'],
+  'bodh-gaya': ['Temples & Pilgrimage', 'Historical & Heritage', 'Culture & Festivals'],
+  chitrakote: ['Nature & Wildlife', 'Lakes & Waterfalls', 'Adventure & Outdoors'],
+  'rann-of-kutch': ['Nature & Wildlife', 'Culture & Festivals', 'Adventure & Outdoors', 'Food & Markets'],
+  kurukshetra: ['Temples & Pilgrimage', 'Historical & Heritage', 'Culture & Festivals'],
+  netarhat: ['Nature & Wildlife', 'Lakes & Waterfalls', 'Adventure & Outdoors'],
+  hampi: ['Historical & Heritage', 'Temples & Pilgrimage', 'Adventure & Outdoors', 'Culture & Festivals'],
+  khajuraho: ['Historical & Heritage', 'Temples & Pilgrimage', 'Culture & Festivals'],
+  'ajanta-ellora': ['Historical & Heritage', 'Temples & Pilgrimage', 'Culture & Festivals'],
+  'loktak-lake': ['Nature & Wildlife', 'Lakes & Waterfalls', 'Culture & Festivals'],
+  sohra: ['Nature & Wildlife', 'Lakes & Waterfalls', 'Adventure & Outdoors'],
+  aizawl: ['Culture & Festivals', 'Food & Markets', 'Nature & Wildlife'],
+  kohima: ['Adventure & Outdoors', 'Historical & Heritage', 'Culture & Festivals', 'Nature & Wildlife'],
+  'puri-konark': ['Beaches & Islands', 'Temples & Pilgrimage', 'Historical & Heritage', 'Culture & Festivals'],
+  amritsar: ['Temples & Pilgrimage', 'Historical & Heritage', 'Culture & Festivals', 'Food & Markets'],
+  gangtok: ['Temples & Pilgrimage', 'Adventure & Outdoors', 'Lakes & Waterfalls', 'Culture & Festivals'],
+  hyderabad: ['Historical & Heritage', 'Temples & Pilgrimage', 'Food & Markets'],
+  neermahal: ['Historical & Heritage', 'Temples & Pilgrimage', 'Nature & Wildlife'],
+  varanasi: ['Temples & Pilgrimage', 'Historical & Heritage', 'Culture & Festivals', 'Food & Markets'],
+  rishikesh: ['Adventure & Outdoors', 'Temples & Pilgrimage', 'Resorts & Wellness', 'Nature & Wildlife'],
+  darjeeling: ['Nature & Wildlife', 'Amusement & Family', 'Culture & Festivals'],
+  delhi: ['Historical & Heritage', 'Temples & Pilgrimage', 'Amusement & Family', 'Food & Markets'],
+  chandigarh: ['Amusement & Family', 'Historical & Heritage', 'Lakes & Waterfalls'],
+  'leh-ladakh': ['Adventure & Outdoors', 'Temples & Pilgrimage', 'Nature & Wildlife', 'Lakes & Waterfalls'],
+  'sri-vijaya-puram': ['Beaches & Islands', 'Nature & Wildlife', 'Historical & Heritage', 'Adventure & Outdoors'],
+  'silvassa-daman': ['Beaches & Islands', 'Amusement & Family', 'Resorts & Wellness', 'Nature & Wildlife'],
+  lakshadweep: ['Beaches & Islands', 'Adventure & Outdoors', 'Resorts & Wellness', 'Nature & Wildlife'],
+  puducherry: ['Beaches & Islands', 'Historical & Heritage', 'Resorts & Wellness', 'Food & Markets'],
+};
+
+export const CATEGORIZED_DESTINATIONS = POPULAR_DESTINATIONS.map((destination) => ({
+  ...destination,
+  placeCategories: PLACE_CATEGORIES_BY_DESTINATION[destination.id] ?? ['Culture & Festivals'],
+}));
+
+export const INDIAN_STATES = [...new Set(CATEGORIZED_DESTINATIONS.map((destination) => destination.state))]
+  .sort((a, b) => a.localeCompare(b));
+
+export const EXPLORE_THEMES = [
+  'All Destinations',
+  'Hills & Mountains',
+  'Heritage & Royal',
+  'Coastal & Beach',
+  'Serene & Nature',
+  'Under ₹7,000'
+];
+
+export const HERO_FEATURED_IMAGE = '/src/assets/images/hero_voyan_travel_1792467058450.jpg';

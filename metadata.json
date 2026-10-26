@@ -1,0 +1,8 @@
+{
+  "name": "Voyan - AI Travel Planning",
+  "description": "Your next adventure, thoughtfully planned. Modern AI-generated itineraries, destination discovery across India, interactive visual maps, and intelligent trip customization.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

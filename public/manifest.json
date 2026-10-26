@@ -1,0 +1,49 @@
+{
+  "id": "/",
+  "name": "Voyan - AI Travel Planning",
+  "short_name": "Voyan",
+  "description": "Your next adventure, thoughtfully planned. Unified trip vault, bookings, live itinerary, expense splits, and travel memories.",
+  "theme_color": "#0F766E",
+  "background_color": "#FBFBFA",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait",
+  "start_url": "/",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/pwa-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["travel", "navigation", "lifestyle"],
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Trip Vault & Tickets",
+      "short_name": "Vault",
+      "description": "View all tickets, bookings, and offline passes",
+      "url": "/?tab=vault"
+    },
+    {
+      "name": "My Itinerary",
+      "short_name": "Itinerary",
+      "description": "Check today's schedule and route",
+      "url": "/?tab=planner"
+    }
+  ]
+}

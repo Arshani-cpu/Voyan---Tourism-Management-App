@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="voyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#115E59" />
+      <stop offset="100%" stop-color="#042F2E" />
+    </linearGradient>
+    <linearGradient id="needleGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCD34D" />
+      <stop offset="100%" stop-color="#F59E0B" />
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="512" height="512" rx="128" fill="url(#voyanGrad)" />
+  
+  <!-- Outer Compass Ring -->
+  <circle cx="256" cy="256" r="160" fill="none" stroke="#2DD4BF" stroke-width="12" opacity="0.3" />
+  <circle cx="256" cy="256" r="140" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-dasharray="8 8" opacity="0.5" />
+  
+  <!-- Compass Cardinal Ticks -->
+  <line x1="256" y1="84" x2="256" y2="108" stroke="#FDE68A" stroke-width="8" stroke-linecap="round" />
+  <line x1="256" y1="404" x2="256" y2="428" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" opacity="0.7" />
+  <line x1="84" y1="256" x2="108" y2="256" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" opacity="0.7" />
+  <line x1="404" y1="256" x2="428" y2="256" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" opacity="0.7" />
+  
+  <!-- Central North-South Needle -->
+  <!-- North Needle (Gold/Amber) -->
+  <polygon points="256,120 286,256 256,236" fill="url(#needleGold)" />
+  <polygon points="256,120 226,256 256,236" fill="#FBBF24" />
+  
+  <!-- South Needle (White/Slate) -->
+  <polygon points="256,392 286,256 256,276" fill="#E2E8F0" />
+  <polygon points="256,392 226,256 256,276" fill="#94A3B8" />
+  
+  <!-- Center Pivot Core -->
+  <circle cx="256" cy="256" r="22" fill="#FFFFFF" />
+  <circle cx="256" cy="256" r="12" fill="#042F2E" />
+</svg>

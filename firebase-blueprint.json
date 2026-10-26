@@ -1,0 +1,90 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile document storing basic authenticated user details",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique user identifier matching auth UID",
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "email": {
+          "type": "string",
+          "description": "User email address",
+          "maxLength": 256
+        },
+        "displayName": {
+          "type": "string",
+          "description": "User display name",
+          "maxLength": 100
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp of account creation"
+        }
+      },
+      "required": ["id", "email"]
+    },
+    "Trip": {
+      "title": "Trip",
+      "description": "User planned trip with destination, schedule, packing list, and itinerary details",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique trip ID",
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Owner user UID",
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "destination": {
+          "type": "string",
+          "description": "Destination city or region name",
+          "maxLength": 200
+        },
+        "days": {
+          "type": "number",
+          "description": "Duration in days"
+        },
+        "climate": {
+          "type": "string",
+          "description": "Selected climate category",
+          "maxLength": 50
+        },
+        "tripStyle": {
+          "type": "string",
+          "description": "Trip style or vibe",
+          "maxLength": 50
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp of trip creation"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp of last update"
+        }
+      },
+      "required": ["id", "userId", "destination", "days"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/User"
+      },
+      "description": "Stores user profile and account settings"
+    },
+    "/trips/{tripId}": {
+      "schema": {
+        "$ref": "#/entities/Trip"
+      },
+      "description": "Stores trips owned by users"
+    }
+  }
+}
