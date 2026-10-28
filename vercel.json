@@ -2,6 +2,11 @@
   "framework": "vite",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "functions": {
+    "api/**/*.ts": {
+      "runtime": "@vercel/node@3"
+    }
+  },
   "headers": [
     {
       "source": "/sw.js",
@@ -28,9 +33,8 @@
   ],
   "rewrites": [
     {
-      "source": "/((?!assets/|data/|sw\\.js|registerSW\\.js|workbox-.*\\.js|manifest\\.json|pwa-icon.*|apple-touch-icon\\.png|.*\\.(?:png|jpg|jpeg|svg|webp|ico|json|woff2?)).*)",
+      "source": "/((?!api/|assets/|data/|sw\\.js|registerSW\\.js|workbox-.*\\.js|manifest\\.json|pwa-icon.*|apple-touch-icon\\.png|.*\\.(?:png|jpg|jpeg|svg|webp|ico|json|woff2?)).*)",
       "destination": "/index.html"
     }
   ]
 }
-
