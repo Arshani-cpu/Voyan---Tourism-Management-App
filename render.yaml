@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: voyan-backend
+    runtime: java
+    region: singapore           # closest to India – change to oregon/frankfurt if preferred
+    plan: free                  # upgrade to starter for persistent disk
+    rootDir: java-backend       # Maven project is inside this subfolder
+
+    buildCommand: ./mvnw package -DskipTests -q
+
+    startCommand: >
+      java
+      -Djava.awt.headless=true
+      -jar target/voyan-java-backend-0.1.0.jar
+
+    healthCheckPath: /api/places/meta/states
+
+    envVars:
+      - key: PORT
+        value: "10000"          # Render injects $PORT; Spring reads it via server.port=${PORT:8081}
+
+      - key: SQLITE_PATH
+        value: /opt/render/project/src/java-backend/.sqlite-data/voyan.sqlite
+
+      # CORS – add your Netlify domain here after first deploy
+      - key: VOYAN_ALLOWED_ORIGINS
+        value: "https://*.netlify.app,https://*.onrender.com,http://localhost:*"
+
+      # Leave blank – fill in Render dashboard after getting Firebase creds
+      - key: FIREBASE_SERVICE_ACCOUNT_JSON
+        value: ""
+      - key: FIREBASE_API_KEY
+        value: ""
+      - key: GEMINI_API_KEY
+        value: ""

@@ -4,12 +4,11 @@ import { HeroSearch } from './components/HeroSearch';
 import { ExamplePromptsSection } from './components/ExamplePromptsSection';
 import { WhoIsTravellingSection } from './components/GroupPlanner/WhoIsTravellingSection';
 import { GroupComparisonModal } from './components/GroupPlanner/GroupComparisonModal';
-import { DestinationDiscovery } from './components/DestinationDiscovery';
-import { DestinationMapExplorer } from './components/DestinationMapExplorer';
+import { PlacesExplorer } from './components/PlacesExplorer';
 import { TripVaultShowcaseSection } from './components/TripVault/TripVaultShowcaseSection';
 import { PackingListShowcaseSection } from './components/PackingList/PackingListShowcaseSection';
 import { VoyanSoundscapesSection } from './components/Soundtrack/VoyanSoundscapesSection';
-import { PopularDestinations } from './components/PopularDestinations';
+
 import { HowItWorks } from './components/HowItWorks';
 import { TravelerTestimonials } from './components/TravelerTestimonials';
 import { TestimonialProof } from './components/TestimonialProof';
@@ -28,19 +27,19 @@ import { SOSModal } from './components/Emergency/SOSModal';
 import { FloatingSOSTrigger } from './components/Emergency/FloatingSOSTrigger';
 import { UPIPaymentModal, UPIPaymentDetails } from './components/Payment/UPIPaymentModal';
 import { TravelDailyAppsHub } from './components/OnDemandApps/TravelDailyAppsHub';
-import { SAMPLE_TRIPS, generateCustomTripPlan } from './data/sampleTrips';
+import { SAMPLE_TRIPS, generateCustomTripPlan, generatePlaceTripPlan, PlaceForPlan } from './data/sampleTrips';
 import { generateGroupTailoredPlan } from './data/groupItineraries';
 import { CATEGORIZED_DESTINATIONS } from './data/destinations';
 import { TripPlan, Activity, DestinationItem, GroupPlanningConfig, TravellerGroupType } from './types/travel';
 import { DestinationClimate, TripType } from './types/packing';
 import { auth, onAuthStateChanged, signOut } from './lib/firebase';
 import { sqliteStore } from './lib/sqliteStore';
-import { APIProvider } from '@vis.gl/react-google-maps';
+
 
 const initialLaunchTab = new URLSearchParams(window.location.search).get('tab');
 
 export default function App() {
-  const mapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY?.trim();
+
   const [currentView, setCurrentView] = useState<'home' | 'planner'>(() =>
     ['planner', 'vault', 'packing'].includes(initialLaunchTab ?? '') ? 'planner' : 'home'
   );
@@ -445,15 +444,19 @@ export default function App() {
             />
 
             {/* Example Search Prompts Showcase Section */}
-            <ExamplePromptsSection
-              onSelectPrompt={handlePlanTrip}
-            />
+            <section id="example-prompts">
+              <ExamplePromptsSection
+                onSelectPrompt={handlePlanTrip}
+              />
+            </section>
 
             {/* Dedicated "Who is travelling?" Section (5 Selectable Group Cards) */}
-            <WhoIsTravellingSection
-              onGeneratePlan={handleGenerateGroupPlan}
-              onOpenComparison={() => setIsComparisonModalOpen(true)}
-            />
+            <section id="who-is-travelling">
+              <WhoIsTravellingSection
+                onGeneratePlan={handleGenerateGroupPlan}
+                onOpenComparison={() => setIsComparisonModalOpen(true)}
+              />
+            </section>
 
             {/* Automated Packing List Generator Showcase */}
             <PackingListShowcaseSection
@@ -465,22 +468,18 @@ export default function App() {
               onOpenVault={handleOpenVault}
             />
 
-            {/* Destination Discovery Section (Goa, Rajasthan, Kerala, Himachal Pradesh) */}
-            <DestinationDiscovery
-              onPlanDestination={handleSelectDiscoveryDestination}
-            />
-
-            {/* Interactive Google Maps Platform India Explorer */}
-            {mapsApiKey ? (
-              <DestinationMapExplorer onPlanDestination={handleSelectDiscoveryDestination} />
-            ) : (
-              <section className="border-t border-stone-200/70 bg-white py-8">
-                <div className="mx-auto max-w-7xl px-4 text-sm text-stone-600 sm:px-6 lg:px-8">
-                  Interactive map is unavailable until <code>VITE_GOOGLE_MAPS_API_KEY</code> is configured.
-                  Browse destinations below and open each place in Google Maps.
-                </div>
-              </section>
-            )}
+            {/* ── Unified Destination Explorer (700 places, maps, entry pass, RedBus) ── */}
+            <section id="places-explorer">
+              <PlacesExplorer
+                onPlanDestination={(place: PlaceForPlan) => {
+                  const plan = generatePlaceTripPlan(place, 2);
+                  setActiveTripPlan(plan);
+                  setPlannerSection('itinerary');
+                  setCurrentView('planner');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+              />
+            </section>
 
             {/* Voyan Travel Soundscapes (Lyria AI Music Generation) */}
             <VoyanSoundscapesSection
@@ -490,11 +489,7 @@ export default function App() {
             {/* What Our Travelers Say Section */}
             <TravelerTestimonials />
 
-            {/* Popular destinations across India */}
-            <PopularDestinations
-              onSelectDestination={handleSelectDiscoveryDestination}
-              onOpenStateDetails={handleOpenStateDetails}
-            />
+
 
             {/* Quantitative Proof Strip */}
             <TestimonialProof />
@@ -664,9 +659,5 @@ export default function App() {
     </MobileDeviceSimulator>
   );
 
-  return mapsApiKey ? (
-    <APIProvider apiKey={mapsApiKey} libraries={['marker', 'routes']}>
-      {appContent}
-    </APIProvider>
-  ) : appContent;
+  return appContent;
 }

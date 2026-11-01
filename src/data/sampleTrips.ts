@@ -489,3 +489,222 @@ export function generateCustomTripPlan(params: {
   }
   return fallback;
 }
+
+// ── Place-aware trip plan generator ──────────────────────────────────────────
+// Uses real Place data from the 700-places database to build a place-specific
+// 3-day itinerary with real entry pass costs, opening hours, and category.
+
+export interface PlaceForPlan {
+  place_id: string;
+  name: string;
+  state: string | null;
+  district: string | null;
+  locality: string | null;
+  place_type: string | null;
+  description: string | null;
+  opening_hours: string | null;
+  rating_value: number | null;
+  selection_category: string | null;
+  google_maps_url: string | null;
+  audience_categories: { category_label: string }[];
+  entry_pass: {
+    indian_price: number;
+    foreign_price: number;
+    child_price: number;
+    notes: string | null;
+    booking_url: string | null;
+  } | null;
+}
+
+function categoryToAct(cat: string | null): Activity['category'] {
+  if (!cat) return 'sightseeing';
+  if (cat.includes('Wildlife') || cat.includes('nature')) return 'nature';
+  if (cat.includes('Heritage') || cat.includes('Historical')) return 'heritage';
+  if (cat.includes('Religious') || cat.includes('Temple')) return 'leisure';
+  if (cat.includes('Museum')) return 'heritage';
+  return 'sightseeing';
+}
+
+function foodBudget(state: string | null) {
+  return ['Maharashtra', 'Delhi', 'Karnataka', 'Tamil Nadu', 'Telangana', 'West Bengal'].includes(state || '') ? 900 : 600;
+}
+
+function accomBudget(state: string | null, cat: string | null) {
+  if (['Goa', 'Himachal Pradesh', 'Uttarakhand', 'Andaman and Nicobar Islands', 'Jammu and Kashmir'].includes(state || '')) return 2500;
+  if (cat?.includes('Wildlife')) return 3500;
+  return 1500;
+}
+
+function transportLabel(state: string | null) {
+  return ['Himachal Pradesh', 'Uttarakhand', 'Sikkim', 'Meghalaya', 'Jammu and Kashmir'].includes(state || '')
+    ? 'Shared Taxi & Local Bus' : 'Auto Rickshaw & State Bus';
+}
+
+function placeRestaurant(place: PlaceForPlan, day: number): RestaurantRecommendation {
+  const loc = place.district || place.locality || place.state || place.name;
+  const priceMap: Record<string, RestaurantRecommendation['priceLevel']> = {
+    Maharashtra: '₹₹', Delhi: '₹₹', Karnataka: '₹₹', Tamil_Nadu: '₹', Rajasthan: '₹₹', Goa: '₹₹₹',
+  };
+  const price = priceMap[place.state || ''] || '₹₹';
+  return {
+    id: `r-${place.place_id}-${day}`,
+    name: `Local Eatery near ${loc}`,
+    cuisine: 'Regional Home-style',
+    priceLevel: price,
+    avgCostForTwo: price === '₹' ? 350 : price === '₹₹₹' ? 1100 : 650,
+    highlightDish: `${place.state || 'Indian'} Thali`,
+    rating: parseFloat((4.1 + day * 0.15).toFixed(1)),
+    location: loc,
+  };
+}
+
+export function generatePlaceTripPlan(place: PlaceForPlan, travellersCount = 2): TripPlan {
+  const entry = place.entry_pass?.indian_price ?? 0;
+  const food = foodBudget(place.state);
+  const accom = accomBudget(place.state, place.selection_category);
+  const transport = 1200;
+  const days = 3;
+  const budgetPP = entry + (food + accom + 300) * days + transport;
+  const act = categoryToAct(place.selection_category);
+  const loc = [place.district, place.state].filter(Boolean).join(', ');
+  const tip = place.entry_pass?.notes || (place.opening_hours ? `Timings: ${place.opening_hours}` : 'Check local timings before visiting.');
+
+  const today = new Date();
+  const end = new Date(today);
+  end.setDate(today.getDate() + days);
+  const fmt = (d: Date) => d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+
+  const audiences = place.audience_categories.map(a => a.category_label.toLowerCase());
+  const groupType: TripPlan['groupType'] =
+    audiences.some(l => l.includes('senior')) ? 'seniors' :
+    audiences.some(l => l.includes('family')) ? 'family' :
+    audiences.some(l => l.includes('couple')) ? 'couple' :
+    audiences.some(l => l.includes('solo')) ? 'solo' : 'friends';
+
+  return {
+    id: `plan-${place.place_id}-${Date.now()}`,
+    title: `${place.name} – ${days}-Day Itinerary`,
+    destination: place.name,
+    state: place.state || '',
+    durationDays: days,
+    travelDates: { start: fmt(today), end: fmt(end) },
+    travellersCount,
+    budgetPerPerson: budgetPP,
+    budgetTotal: budgetPP * travellersCount,
+    interests: [
+      place.selection_category || 'Sightseeing',
+      entry === 0 ? 'Free Entry' : `Entry ₹${entry}`,
+      place.rating_value && place.rating_value >= 4.5 ? 'Top Rated' : null,
+      place.district || null,
+    ].filter(Boolean).slice(0, 4) as string[],
+    coverImage: '/src/assets/images/dest_ooty_hills_1792467058609.jpg',
+    overviewSummary:
+      (place.description ? place.description.slice(0, 200) + '…' : `Explore ${place.name} in ${loc}.`) +
+      ` Entry: ${entry > 0 ? `₹${entry}/person` : 'Free'}. Stay: ~₹${accom}/night. Food: ~₹${food}/day.`,
+    groupType,
+    transportPreference: transportLabel(place.state),
+    createdAt: today.toISOString().split('T')[0],
+    saved: false,
+    days: [
+      {
+        dayNumber: 1,
+        title: `Arrival & First Visit – ${place.name}`,
+        theme: `Discover ${place.name}`,
+        activities: [
+          {
+            id: `${place.place_id}-d1-a`, time: '10:00 AM',
+            title: `Arrive in ${place.district || place.state || place.name}`,
+            description: `Check into accommodation in ${loc}. Freshen up and get oriented before your first visit to ${place.name}.`,
+            category: 'leisure', duration: '1.5 hrs', costEstimate: accom,
+            locationName: place.district || place.state || 'Destination',
+            coordinates: { x: 30, y: 40 },
+            tips: 'Book accommodation in advance — especially on weekends.',
+          },
+          {
+            id: `${place.place_id}-d1-b`, time: place.opening_hours ? '02:00 PM' : '11:30 AM',
+            title: `Visit ${place.name}`,
+            description: place.description
+              ? place.description.slice(0, 220) + (place.description.length > 220 ? '…' : '')
+              : `Explore ${place.name}, a remarkable attraction in ${loc}.`,
+            category: act, duration: '3 hrs',
+            costEstimate: entry * travellersCount,
+            locationName: place.name, coordinates: { x: 55, y: 50 }, tips: tip,
+          },
+          {
+            id: `${place.place_id}-d1-c`, time: '05:30 PM',
+            title: `Evening stroll – ${place.district || place.locality || 'local market'}`,
+            description: `Walk through the local market near ${place.name}. Try street food, browse handicrafts, and soak in the evening atmosphere.`,
+            category: 'leisure', duration: '1.5 hrs', costEstimate: 200,
+            locationName: `${place.district || place.state} Market`, coordinates: { x: 45, y: 65 },
+            tips: 'Bargain at local shops. Try regional snacks from street stalls.',
+          },
+        ],
+        diningOptions: [placeRestaurant(place, 1)],
+      },
+      {
+        dayNumber: 2,
+        title: `In-Depth Exploration – ${loc}`,
+        theme: `Explore ${loc}`,
+        activities: [
+          {
+            id: `${place.place_id}-d2-a`, time: '09:00 AM',
+            title: `Morning at ${place.name}`,
+            description: `Experience ${place.name} in the peaceful morning hours. Best time for photography and avoiding crowds.`,
+            category: act, duration: '2 hrs',
+            costEstimate: entry * travellersCount,
+            locationName: place.name, coordinates: { x: 55, y: 45 },
+            tips: 'Arrive 30 minutes before opening to beat the crowds.',
+          },
+          {
+            id: `${place.place_id}-d2-b`, time: '12:00 PM',
+            title: `Nearby attractions in ${place.district || place.state}`,
+            description: `Explore other points of interest in ${loc} — local temples, viewpoints, museums, or parks near ${place.name}.`,
+            category: 'sightseeing', duration: '2.5 hrs', costEstimate: 150,
+            locationName: `${place.district || place.state} surroundings`, coordinates: { x: 70, y: 55 },
+            tips: 'Ask locals or your hotel for hidden gems in the area.',
+          },
+          {
+            id: `${place.place_id}-d2-c`, time: '04:00 PM',
+            title: `Cultural experience – ${place.state}`,
+            description: `Dive into ${place.state}'s culture. Visit a craft market, attend a local performance, or browse a regional museum.`,
+            category: 'heritage', duration: '2 hrs', costEstimate: 350,
+            locationName: `${place.state} Cultural Zone`, coordinates: { x: 35, y: 70 },
+            tips: 'Government emporiums offer authentic handicrafts at fixed prices.',
+          },
+        ],
+        diningOptions: [placeRestaurant(place, 2)],
+      },
+      {
+        dayNumber: 3,
+        title: 'Final Morning & Departure',
+        theme: 'Last Memories & Farewell',
+        activities: [
+          {
+            id: `${place.place_id}-d3-a`, time: '09:00 AM',
+            title: `Final visit to ${place.name}`,
+            description: `One last morning at ${place.name} to capture memories, revisit favourite spots, or explore any missed corners.`,
+            category: act, duration: '1.5 hrs', costEstimate: 0,
+            locationName: place.name, coordinates: { x: 55, y: 50 },
+            tips: place.entry_pass?.booking_url ? 'Book online to skip ticket queues.' : 'Carry a camera — morning light is beautiful.',
+          },
+          {
+            id: `${place.place_id}-d3-b`, time: '11:30 AM',
+            title: 'Souvenir shopping & breakfast',
+            description: `Shop for local handicrafts, spices, and regional specialties unique to ${place.state}. Grab a traditional breakfast at a local café.`,
+            category: 'food', duration: '1.5 hrs', costEstimate: 600,
+            locationName: `${place.district || place.state} Bazaar`, coordinates: { x: 40, y: 60 },
+            tips: `Buy directly from artisans in ${place.state} for the best prices and authenticity.`,
+          },
+          {
+            id: `${place.place_id}-d3-c`, time: '01:00 PM',
+            title: 'Departure',
+            description: 'Check out and head to the nearest bus stand or railway station. Safe travels!',
+            category: 'leisure', duration: '1 hr', costEstimate: transport,
+            locationName: 'Bus Stand / Railway Station', coordinates: { x: 20, y: 30 },
+          },
+        ],
+        diningOptions: [placeRestaurant(place, 3)],
+      },
+    ],
+  };
+}

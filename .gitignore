@@ -4,8 +4,20 @@ dist/
 coverage/
 .DS_Store
 *.log
-.env*
-!.env.example
+
+# Local env files (keep secrets out of git)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Allow the production env (only contains public Render URL – no secrets)
+!.env.production
+
 .sqlite-data/
 .file-data/
 java-backend/target/
+
+# Firebase credentials – never commit
+firebase-applet-config.json

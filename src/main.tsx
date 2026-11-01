@@ -3,17 +3,7 @@ import App from './App.tsx';
 import { LiveLocationViewer } from './components/Emergency/LiveLocationViewer';
 import './index.css';
 
-// Google Maps Platform Quota Defense listener for Demo Key
-const origError = console.error;
-console.error = (...args: unknown[]) => {
-  origError.apply(console, args);
-  try {
-    const msg = args.map((a) => (typeof a === 'object' && a !== null ? JSON.stringify(a) : String(a))).join(' ');
-    if (msg.includes('OverQuotaMapError') || msg.includes('QuotaExceededError')) {
-      window.dispatchEvent(new CustomEvent('gmp-quota-exceeded'));
-    }
-  } catch {}
-};
+
 
 // Service Worker management: only enable cache worker in production builds.
 // In development, active service workers can intercept Vite dev modules and cause blank screens.

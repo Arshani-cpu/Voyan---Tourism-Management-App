@@ -1,21 +1,13 @@
-/// <reference types="google.maps" />
-import React, { useState, useEffect, useMemo } from 'react';
-import {
-  Map,
-  AdvancedMarker,
-  InfoWindow,
-  Pin,
-  useMap
-} from '@vis.gl/react-google-maps';
+import React, { useState, useMemo } from 'react';
 import {
   MapPin,
   Compass,
-  Car,
-  Layers,
   ArrowRight,
   ExternalLink,
   Sparkles,
-  Maximize2
+  Star,
+  Calendar,
+  TrendingUp,
 } from 'lucide-react';
 import { DestinationItem } from '../types/travel';
 import { DISCOVERY_DESTINATIONS } from '../data/destinations';
@@ -250,47 +242,32 @@ const INDIA_DESTINATIONS: DestinationPin[] = [
   }
 ];
 
-// Map camera controller to smoothly pan/zoom
-function CameraPanHelper({ center, zoom }: { center: { lat: number; lng: number }; zoom: number }) {
-  const map = useMap();
-  useEffect(() => {
-    if (!map) return;
-    map.panTo(center);
-    map.setZoom(zoom);
-  }, [map, center, zoom]);
-  return null;
+/** Build a free OpenStreetMap iframe embed URL centred on given coordinates */
+function buildOsmEmbedUrl(lat: number, lng: number, zoom = 11): string {
+  const delta = 0.5 / Math.pow(2, zoom - 10);
+  const bbox = `${lng - delta},${lat - delta},${lng + delta},${lat + delta}`;
+  return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lng}`;
 }
 
-// Google Maps Traffic Layer Controller
-function TrafficLayerToggle({ enabled }: { enabled: boolean }) {
-  const map = useMap();
-  useEffect(() => {
-    if (!map) return;
-    const traffic = new google.maps.TrafficLayer();
-    if (enabled) {
-      traffic.setMap(map);
-    }
-    return () => {
-      traffic.setMap(null);
-    };
-  }, [map, enabled]);
-  return null;
+/** Google Maps search URL — opens in browser / Google Maps app */
+function buildGoogleMapsUrl(name: string, state: string): string {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name + ', ' + state + ', India')}`;
 }
 
 export const DestinationMapExplorer: React.FC<DestinationMapExplorerProps> = ({
   onPlanDestination
 }) => {
-  const [selectedRegion, setSelectedRegion] = useState<'All' | 'North' | 'South' | 'West'>('All');
-  const [selectedPin, setSelectedPin] = useState<DestinationPin | null>(null);
-  const [showTraffic, setShowTraffic] = useState(false);
-  const [mapTypeId, setMapTypeId] = useState<'roadmap' | 'satellite' | 'terrain'>('roadmap');
+  const [selectedRegion, setSelectedRegion] = useState<'All' | 'North' | 'South' | 'West' | 'East' | 'Himalayas'>('All');
+  const [selectedPin, setSelectedPin] = useState<DestinationPin | null>(INDIA_DESTINATIONS[0]);
 
   const filteredDestinations = useMemo(() => {
     if (selectedRegion === 'All') return INDIA_DESTINATIONS;
     return INDIA_DESTINATIONS.filter((d) => d.region === selectedRegion);
   }, [selectedRegion]);
 
-  const defaultCenter = useMemo(() => ({ lat: 21.7679, lng: 78.8718 }), []);
+  const activePin = selectedPin ?? filteredDestinations[0];
+  const osmEmbedUrl = buildOsmEmbedUrl(activePin.lat, activePin.lng);
+  const gmapsUrl = buildGoogleMapsUrl(activePin.name, activePin.state);
 
   return (
     <section id="google-maps-explorer" className="py-16 sm:py-24 bg-[#F5F7F6] border-t border-stone-200/80">
@@ -300,19 +277,19 @@ export const DestinationMapExplorer: React.FC<DestinationMapExplorerProps> = ({
           <div>
             <div className="flex items-center gap-2 text-xs font-bold text-teal-800 tracking-wider uppercase mb-1.5">
               <Compass className="w-4 h-4 text-teal-700" />
-              <span>Interactive Google Maps Platform</span>
+              <span>Destination Explorer</span>
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#0F172A]">
               Explore Destinations across India
             </h2>
             <p className="mt-2 text-sm sm:text-base text-stone-600 max-w-2xl">
-              Tap any pin on the live Google Map to preview travel estimates, highlights, and jump straight into an AI-tailored itinerary.
+              Pick any destination to preview it on the map. Click <strong>Open in Google Maps</strong> to view live satellite imagery, directions, and Street View.
             </p>
           </div>
 
           {/* Region Filter Buttons */}
           <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl border border-stone-200/90 shadow-xs self-start md:self-auto overflow-x-auto max-w-full">
-            {(['All', 'North', 'South', 'West'] as const).map((region) => (
+            {(['All', 'North', 'South', 'West', 'East', 'Himalayas'] as const).map((region) => (
               <button
                 key={region}
                 onClick={() => {
@@ -331,165 +308,162 @@ export const DestinationMapExplorer: React.FC<DestinationMapExplorerProps> = ({
           </div>
         </div>
 
-        {/* Map Container */}
-        <div className="bg-white rounded-3xl border border-stone-200 shadow-md overflow-hidden relative">
-          {/* Map Toolbar Overlay */}
-          <div className="p-3 bg-stone-50/95 backdrop-blur-md border-b border-stone-200 flex flex-wrap items-center justify-between gap-2.5 z-10 relative">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-xs font-bold text-stone-900">
-                Live Google Maps · {filteredDestinations.length} Curated Destinations
-              </span>
-            </div>
+        {/* Main Content: 2-column layout */}
+        <div className="bg-white rounded-3xl border border-stone-200 shadow-md overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr]">
 
-            <div className="flex items-center gap-2">
-              {/* Traffic toggle */}
-              <button
-                onClick={() => setShowTraffic(!showTraffic)}
-                className={`px-2.5 py-1 text-xs font-bold rounded-lg border transition-all flex items-center gap-1.5 cursor-pointer ${
-                  showTraffic
-                    ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
-                    : 'bg-white text-stone-700 border-stone-200 hover:bg-stone-100'
-                }`}
-                title="Toggle real-time Google traffic layer"
-              >
-                <Car className="w-3.5 h-3.5" />
-                <span>Live Traffic</span>
-              </button>
-
-              {/* Map Type Switcher */}
-              <button
-                onClick={() =>
-                  setMapTypeId((prev) =>
-                    prev === 'roadmap' ? 'satellite' : prev === 'satellite' ? 'terrain' : 'roadmap'
-                  )
-                }
-                className="px-2.5 py-1 text-xs font-bold rounded-lg border border-stone-200 bg-white text-stone-700 hover:bg-stone-100 transition-colors flex items-center gap-1.5 cursor-pointer"
-                title="Switch map view"
-              >
-                <Layers className="w-3.5 h-3.5 text-teal-700" />
-                <span className="capitalize">{mapTypeId}</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Interactive Map Canvas */}
-          <div className="h-[520px] sm:h-[600px] w-full relative">
-              <Map
-                mapId="DEMO_MAP_ID"
-                defaultCenter={defaultCenter}
-                defaultZoom={5}
-                mapTypeId={mapTypeId}
-                gestureHandling="cooperative"
-                disableDefaultUI={false}
-                internalUsageAttributionIds={['gmp_mcp_codeassist_v1_aistudio']}
-                style={{ width: '100%', height: '100%' }}
-              >
-                <TrafficLayerToggle enabled={showTraffic} />
-
-                {/* Render pins for all destinations */}
+            {/* LEFT PANEL — Destination list */}
+            <div className="border-r border-stone-200 flex flex-col max-h-[620px]">
+              <div className="p-3 bg-stone-50 border-b border-stone-200 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-xs font-bold text-stone-700">
+                  {filteredDestinations.length} Curated Destinations
+                </span>
+              </div>
+              <div className="overflow-y-auto flex-1 divide-y divide-stone-100">
                 {filteredDestinations.map((dest) => {
-                  const isSelected = selectedPin?.id === dest.id;
+                  const isActive = activePin.id === dest.id;
                   return (
-                    <AdvancedMarker
+                    <button
                       key={dest.id}
-                      position={{ lat: dest.lat, lng: dest.lng }}
-                      title={dest.name}
                       onClick={() => setSelectedPin(dest)}
+                      className={`w-full text-left p-3 flex items-start gap-3 transition-colors cursor-pointer group ${
+                        isActive ? 'bg-teal-50' : 'hover:bg-stone-50'
+                      }`}
                     >
-                      <Pin
-                        background={isSelected ? '#0F766E' : '#115E59'}
-                        borderColor="#FFFFFF"
-                        glyphColor="#FFFFFF"
-                        scale={isSelected ? 1.3 : 1.05}
-                      >
-                        <span className="text-[10px] font-black text-white">📍</span>
-                      </Pin>
-                    </AdvancedMarker>
-                  );
-                })}
-
-                {/* InfoWindow for Selected Destination */}
-                {selectedPin && (
-                  <InfoWindow
-                    position={{ lat: selectedPin.lat, lng: selectedPin.lng }}
-                    onCloseClick={() => setSelectedPin(null)}
-                    maxWidth={320}
-                  >
-                    <div className="p-1 text-stone-900 text-left font-['Plus_Jakarta_Sans',sans-serif]">
-                      <div className="relative aspect-[16/9] w-full rounded-lg overflow-hidden mb-2 bg-stone-100">
+                      {/* Thumbnail */}
+                      <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-stone-200">
                         <img
-                          src={selectedPin.image}
-                          alt={selectedPin.name}
+                          src={dest.image}
+                          alt={dest.name}
                           className="w-full h-full object-cover"
+                          loading="lazy"
                         />
-                        <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-stone-900/80 text-white text-[9px] font-bold">
-                          {selectedPin.state}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-1">
+                          <span className={`text-xs font-bold leading-tight ${isActive ? 'text-teal-900' : 'text-stone-900'}`}>
+                            {dest.name}
+                          </span>
+                          {isActive && (
+                            <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-teal-500 mt-1" />
+                          )}
+                        </div>
+                        <span className="text-[10px] text-stone-500 flex items-center gap-0.5">
+                          <MapPin className="w-2.5 h-2.5" />{dest.state}
+                        </span>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="flex items-center gap-0.5 text-[10px] font-bold text-amber-600">
+                            <Star className="w-2.5 h-2.5 fill-amber-400 stroke-amber-500" />
+                            {dest.rating}
+                          </span>
+                          <span className="text-[10px] text-stone-500">
+                            ₹{dest.startingPrice.toLocaleString()}+
+                          </span>
+                          <span className="text-[10px] text-stone-400">{dest.recommendedDays}d</span>
                         </div>
                       </div>
-
-                      <div className="flex items-center justify-between gap-1 mb-1">
-                        <h4 className="text-sm font-bold text-stone-900 leading-snug">
-                          {selectedPin.name}
-                        </h4>
-                        <span className="text-xs font-black text-teal-800">
-                          ₹{selectedPin.startingPrice.toLocaleString()}
-                        </span>
-                      </div>
-
-                      <p className="text-[11px] text-stone-600 line-clamp-2 leading-relaxed mb-2">
-                        {selectedPin.tagline}
-                      </p>
-
-                      <div className="text-[10px] text-stone-500 mb-2 flex items-center justify-between">
-                        <span>Best: {selectedPin.bestMonths}</span>
-                        <span>{selectedPin.recommendedDays} Days Suggested</span>
-                      </div>
-
-                      <div className="flex items-center justify-between gap-2 pt-2 border-t border-stone-100">
-                        <a
-                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedPin.name + ' ' + selectedPin.state)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-[10px] font-bold text-stone-600 hover:text-stone-900"
-                        >
-                          <span>Google Maps</span>
-                          <ExternalLink className="w-2.5 h-2.5" />
-                        </a>
-
-                        <button
-                          onClick={() => onPlanDestination(selectedPin)}
-                          className="px-2.5 py-1.5 rounded-lg bg-teal-800 hover:bg-teal-900 text-white text-[11px] font-bold flex items-center gap-1 shadow-xs cursor-pointer"
-                        >
-                          <Sparkles className="w-3 h-3 text-teal-300" />
-                          <span>Plan Trip</span>
-                          <ArrowRight className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </div>
-                  </InfoWindow>
-                )}
-              </Map>
-
-            {/* Quick Destination Pill selector at bottom of map */}
-            <div className="absolute bottom-4 left-4 right-4 z-10 flex gap-2 overflow-x-auto pb-1 pointer-events-none">
-              <div className="flex gap-2 pointer-events-auto mx-auto max-w-full">
-                {filteredDestinations.slice(0, 5).map((dest) => (
-                  <button
-                    key={dest.id}
-                    onClick={() => setSelectedPin(dest)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap shadow-md backdrop-blur-md transition-all cursor-pointer flex items-center gap-1.5 ${
-                      selectedPin?.id === dest.id
-                        ? 'bg-teal-900 text-white ring-2 ring-teal-400'
-                        : 'bg-white/95 text-stone-800 hover:bg-white'
-                    }`}
-                  >
-                    <MapPin className="w-3 h-3 text-teal-600" />
-                    <span>{dest.name}</span>
-                  </button>
-                ))}
+                    </button>
+                  );
+                })}
               </div>
             </div>
+
+            {/* RIGHT PANEL — Map + Detail */}
+            <div className="flex flex-col">
+              {/* OpenStreetMap iframe — free, no API key */}
+              <div className="relative h-[340px] sm:h-[400px] bg-stone-100">
+                <iframe
+                  key={activePin.id}
+                  title={`Map of ${activePin.name}`}
+                  src={osmEmbedUrl}
+                  className="w-full h-full border-0"
+                  loading="lazy"
+                  referrerPolicy="no-referrer"
+                />
+                {/* "Open in Google Maps" overlay button */}
+                <a
+                  href={gmapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/95 backdrop-blur-md text-xs font-bold text-stone-800 border border-stone-200 shadow-md hover:bg-teal-50 hover:text-teal-900 transition-colors"
+                >
+                  <MapPin className="w-3.5 h-3.5 text-teal-700" />
+                  Open in Google Maps
+                  <ExternalLink className="w-3 h-3 text-stone-400" />
+                </a>
+                {/* OSM attribution */}
+                <div className="absolute bottom-0 left-0 right-0 bg-white/80 backdrop-blur text-[9px] text-stone-400 px-2 py-0.5 text-right">
+                  © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" className="underline">OpenStreetMap</a> contributors
+                </div>
+              </div>
+
+              {/* Destination detail card */}
+              <div className="p-4 sm:p-5 flex-1 flex flex-col gap-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <h3 className="text-base font-bold text-stone-900 leading-snug">{activePin.name}</h3>
+                    <p className="text-xs text-stone-500 flex items-center gap-1">
+                      <MapPin className="w-3 h-3" />{activePin.state} · {activePin.category}
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="text-sm font-black text-teal-800">₹{activePin.startingPrice.toLocaleString()}</div>
+                    <div className="text-[10px] text-stone-400">starting price</div>
+                  </div>
+                </div>
+
+                <p className="text-xs text-stone-600 leading-relaxed line-clamp-2">{activePin.tagline}</p>
+
+                <div className="flex items-center gap-3 text-[10px] text-stone-500">
+                  <span className="flex items-center gap-1">
+                    <Star className="w-3 h-3 fill-amber-400 stroke-amber-500" />
+                    <strong className="text-stone-700">{activePin.rating}</strong>
+                    <span>({activePin.reviewsCount.toLocaleString()} reviews)</span>
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Calendar className="w-3 h-3 text-teal-600" />
+                    {activePin.bestMonths}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <TrendingUp className="w-3 h-3 text-teal-600" />
+                    {activePin.recommendedDays} days
+                  </span>
+                </div>
+
+                {/* Highlights */}
+                <div className="flex flex-wrap gap-1.5">
+                  {activePin.highlights.map((h) => (
+                    <span key={h} className="px-2 py-0.5 rounded-full bg-teal-50 border border-teal-100 text-[10px] font-semibold text-teal-800">
+                      {h}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Action row */}
+                <div className="flex items-center gap-2 mt-auto pt-1">
+                  <a
+                    href={buildGoogleMapsUrl(activePin.name, activePin.state)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-stone-200 text-xs font-bold text-stone-700 hover:bg-stone-50 transition-colors"
+                  >
+                    <MapPin className="w-3.5 h-3.5 text-teal-700" />
+                    Google Maps
+                    <ExternalLink className="w-3 h-3 text-stone-400" />
+                  </a>
+                  <button
+                    onClick={() => onPlanDestination(activePin)}
+                    className="flex-1 flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-lg bg-teal-800 hover:bg-teal-900 text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-teal-300" />
+                    Plan with AI
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>

@@ -1,4 +1,4 @@
-// Geo coordinates mapping utility for Google Maps Platform
+// Geo coordinates utility — destination centres and POI lookup
 
 export interface LatLng {
   lat: number;

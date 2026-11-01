@@ -154,21 +154,24 @@ export const Navbar: React.FC<NavbarProps> = ({
           </a>
 
 
-          {/* Destinations — visible at 2xl+ */}
+          {/* Destinations — scrolls to the 700-places explorer section */}
           <a
-            href="#popular-destinations"
+            href="#places-explorer"
             onClick={(e) => {
+              e.preventDefault();
               if (currentView === 'planner') {
-                e.preventDefault();
                 onNavigateHome();
                 setTimeout(() => {
-                  document.getElementById('popular-destinations')?.scrollIntoView({ behavior: 'smooth' });
-                }, 100);
+                  document.getElementById('places-explorer')?.scrollIntoView({ behavior: 'smooth' });
+                }, 150);
+              } else {
+                document.getElementById('places-explorer')?.scrollIntoView({ behavior: 'smooth' });
               }
             }}
-            className="hidden xl:block hover:text-teal-900 transition-colors whitespace-nowrap shrink-0"
+            className="hidden xl:flex items-center gap-1.5 hover:text-teal-900 transition-colors whitespace-nowrap shrink-0"
           >
-            Destinations
+            <MapPin className="w-4 h-4 text-teal-600" />
+            <span>Destinations</span>
           </a>
 
           {/* My Trips — always visible at lg+ */}
