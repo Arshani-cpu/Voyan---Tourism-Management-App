@@ -7,6 +7,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.DependsOn;
 
 import java.io.InputStream;
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.List;
  * Skips any place whose place_id already exists.
  */
 @Component
+@DependsOn("databaseSchemaInitializer")
 public class AdditionalPlacesLoader implements InitializingBean {
 
     private final JdbcTemplate jdbcTemplate;
