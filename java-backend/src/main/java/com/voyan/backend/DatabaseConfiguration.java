@@ -6,12 +6,11 @@ import java.nio.file.Path;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.beans.factory.InitializingBean;
 
 @Configuration
 public class DatabaseConfiguration {
@@ -29,10 +28,9 @@ public class DatabaseConfiguration {
         return dataSource;
     }
 
-    @Bean
-    @Order(0)
-    CommandLineRunner initializeDatabase(JdbcTemplate jdbcTemplate) {
-        return args -> {
+    @Bean(name = "databaseSchemaInitializer")
+InitializingBean initializeDatabase(JdbcTemplate jdbcTemplate) {
+    return () -> {
             jdbcTemplate.execute("PRAGMA journal_mode = WAL");
             jdbcTemplate.execute("PRAGMA busy_timeout = 5000");
             jdbcTemplate.execute("""
